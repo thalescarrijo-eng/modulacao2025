@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Aulas de Educação Física - Mineiros</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciador de Aulas de Educação Física</h1>
+        
+        <div class="summary-section">
+            <h2>Resumo</h2>
+            <div id="resumo">
+                </div>
+        </div>
+
+        <div class="action-bar">
+            <h2>Todas as Aulas</h2>
+            <button onclick="openModal()">Adicionar Nova Aula</button>
+        </div>
+        
+        <div class="table-container">
+            <table id="aulas-table">
+                <thead>
+                    <tr>
+                        <th>Escola</th>
+                        <th>Turno</th>
+                        <th>Turma</th>
+                        <th>Nº Aulas</th>
+                        <th>Professor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="aula-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2 id="modal-title">Adicionar Nova Aula</h2>
+            <form id="aula-form">
+                <input type="hidden" id="aula-id">
+                <label for="escola">Escola:</label>
+                <input type="text" id="escola" name="escola" required>
+                
+                <label for="turno">Turno:</label>
+                <input type="text" id="turno" name="turno" required>
+                
+                <label for="turma">Turma:</label>
+                <input type="text" id="turma" name="turma" required>
+                
+                <label for="num_aulas">Nº Aulas:</label>
+                <input type="number" id="num_aulas" name="num_aulas" required>
+                
+                <label for="professor">Professor:</label>
+                <input type="text" id="professor" name="professor" required>
+                
+                <button type="submit" id="save-button">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
