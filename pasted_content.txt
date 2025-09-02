@@ -1,0 +1,258 @@
+Build a full-stack, production-ready web application in Portuguese (Brazil) to manage a municipal schools sports cup. The app must implement three access modes: Visitor (no authentication), Teacher (username/password), and Admin (username/password). Use clean architecture, role-based access control, audit logs, and a responsive UI. Seed the database with the exact competitions, schools, and teachers provided below. All labels, buttons, messages, data, and UI text must be in pt-BR.
+
+Target stack and quality requirements:
+
+Backend: Node.js + TypeScript + Express or NestJS; ORM Prisma; PostgreSQL database.
+
+Auth: JWT for API, HTTP-only cookies for session; password hashing with bcrypt; role-based authorization middleware (VISITANTE, PROFESSOR, ADM).
+
+Frontend: React (Next.js 14 with App Router) or Vue 3; TypeScript; Tailwind CSS; React Query/RTK Query or Vue Query; form validation with Zod/Yup; i18n set to pt-BR (but single locale).
+
+DevOps: Docker Compose (web, api, db); environment variables; migration and seeding scripts; ESLint + Prettier; basic CI-ready scripts.
+
+UX: Mobile-first, responsive; accessible components; breadcrumbs; loading/skeleton states; optimistic updates where safe; toast feedback; error boundaries.
+
+Testing: Minimal but real tests (at least auth + core flows) using Vitest/Jest + Supertest (API) and Playwright/Cypress (E2E basic smoke).
+
+User roles and capabilities (all UI in pt-BR):
+
+VISITANTE (no login; “Entrar como Visitante” button):
+
+Can view public “Tabela de Jogos”, “Resultados”, “Classificação”, “Competições”, “Escolas”, “Regras do Torneio”.
+
+No user/password required. Session is anonymous. Read-only.
+
+Routes: “/”, “/competicoes”, “/competicoes/{id}”, “/jogos”, “/jogos/{id}”.
+
+Must not see any edit buttons or private data.
+
+PROFESSOR (login with username/password):
+
+Professors are linked to one or more Schools; can manage only their own team(s).
+
+Can: adicionar times (do(s) time(s) da sua escola), cadastrar/editar elenco (apenas números/camisas dos atletas), para cada jogo do seu time registrar a lista dos números que jogaram, abrir “Recurso” (um pedido formal) na aba do jogo do seu time, e visualizar todas as funções do visitante.
+
+Cannot: aprovar/indeferir recursos; nem editar outras escolas/competições.
+
+Additional routes (além das públicas): “/meus-times”, “/meus-jogos”, “/jogos/{id}/recurso”.
+
+Recursos têm status: “Aberto”, “Em análise (ADM)”, “Deferido”, “Indeferido”.
+
+Toda ação do professor deve ser auditada (quem, quando, o quê).
+
+ADM (login with username/password):
+
+Full CRUD de Competições, Escolas, Professores; criação/edição/remoção de Times; geração do login (usuário e senha inicial) de cada Professor.
+
+Pode ver e decidir Recursos (aprovar/indeferir) e registrar decisão com justificativa.
+
+Acessa tudo que o Professor e Visitante veem.
+
+Rotas extras: “/admin”, “/admin/competicoes”, “/admin/escolas”, “/admin/professores”, “/admin/times”, “/admin/recursos”.
+
+Domain and data model (Portuguese names):
+
+Escola { id, nome, createdAt, updatedAt }
+
+Professor { id, nome, username, passwordHash, email?, escolas: many-to-many, ativo }
+
+Competicao { id, titulo, modalidade (“Futsal”|“Queimada”), genero (“Masculino”|“Feminino”), subCategoria (“SUB-09”|“SUB-11”), status (“Planejada”|“Em andamento”|“Encerrada”) }
+
+Time { id, nome, escolaId, competicaoId, professorId }
+
+Atleta { id, timeId, numeroCamisa:int (único por time), nomeOpcional? } // foco é o número
+
+Jogo { id, competicaoId, rodada:int, dataHora, local, timeCasaId, timeForaId, placarCasa:int?, placarFora:int?, status (“Agendado”|“Em andamento”|“Encerrado”) }
+
+ParticipacaoEmJogo { id, jogoId, timeId, numerosAtletas:int[] } // somente números, conforme solicitado
+
+Recurso { id, jogoId, timeId, professorId, status (“Aberto”|“Em análise (ADM)”|“Deferido”|“Indeferido”), motivo:text, respostaAdm?:text, createdAt, updatedAt }
+
+Auditoria { id, userId?, role, acao, entidade, entidadeId, payloadJson, createdAt }
+
+Seed inicial (pt-BR; usar exatamente estes valores):
+Competições:
+
+FUTSAL MASCULINO SUB -11 (modalidade=“Futsal”, genero=“Masculino”, subCategoria=“SUB-11”)
+
+FUTSAL MASCULINO SUB -09 (modalidade=“Futsal”, genero=“Masculino”, subCategoria=“SUB-09”)
+
+FUTSAL FEMININO SUB -11 (modalidade=“Futsal”, genero=“Feminino”, subCategoria=“SUB-11”)
+
+QUEIMADA MASCULINO SUB -11 (modalidade=“Queimada”, genero=“Masculino”, subCategoria=“SUB-11”)
+
+QUEIMADA FEMININO SUB -09 (modalidade=“Queimada”, genero=“Feminino”, subCategoria=“SUB-09”)
+
+QUEIMADA FEMININO SUB -11 (modalidade=“Queimada”, genero=“Feminino”, subCategoria=“SUB-11”)
+
+Escolas:
+
+Escola Municipal Professor Juarez Távora de Carvalho
+
+Escola Municipal Maria Aparecida de Almeida Paniago
+
+Escola Municipal Padre Maximino Alvarez Gutierrez
+
+Escola Municipal Dom Bosco
+
+Escola Municipal Tonico Corredeira
+
+Escola Municipal Santo Antônio
+
+Escola Municipal Professor Salviano Neves Amorim
+
+Escola Municipal Otalecio Alves Irineu
+
+Escola Municipal Maria Eduarda Condinho Filgueiras
+
+Escola Municipal Elias Carrijo de Sousa
+
+Professores (criar com usernames derivados sem acento, senhas temporárias “Trocar123!” e vinculados a nenhuma escola inicialmente; ADM definirá vínculos depois):
+
+Cristiane Alves
+
+Lindonei Junior
+
+Alberto
+
+Ana Mireile
+
+Daiana
+
+Domingos
+
+Hugo
+
+Lorena
+
+Poliane Vilela
+
+Ana Paula
+
+Fernando Shoenberger Machado
+
+MArianny
+
+Functional requirements (pt-BR UI and behavior):
+
+Landing header com botões: “Entrar como Visitante”, “Login Professor”, “Login ADM”.
+
+Visitante: páginas públicas com filtro por competição, rodada, escola; tabela de jogos com data, hora, local, times, placar e status; página de resultados; classificação por competição (vitória=3, empate=1, derrota=0).
+
+Professor:
+
+“Meus Times”: criar/editar time vinculado à sua escola e competição; gerenciar elenco (apenas números de camisa, 1–99, únicos no time).
+
+“Meus Jogos”: listar jogos do seu time; em cada jogo, cadastrar “Números dos atletas que jogaram” (lista de inteiros) e abrir “Recurso” com campo “Motivo do recurso”.
+
+Pode editar somente antes do jogo mudar para “Encerrado”.
+
+Recurso: ao criar, status “Aberto”; ADM pode mudar para “Em análise (ADM)”, “Deferido” ou “Indeferido”, com “Resposta do ADM”.
+
+ADM:
+
+CRUD completo de Competições, Escolas, Professores; geração/edição de logins de professores; reset de senha.
+
+Pode criar tabela inicial de jogos (gerador de confrontos por competição em turno único), editar jogos, lançar placares, encerrar jogos.
+
+Moderação de Recursos com histórico e justificativa.
+
+Auditoria: registrar todas as ações sensíveis com usuário, role, entidade, payload.
+
+Permissões: middleware deve garantir que professores só acessem dados dos próprios times/escolas; visitantes só GET público; ADM acesso total.
+
+Validações e regras:
+
+Números de camisa obrigatoriamente únicos por time e entre 1–99.
+
+Participação em jogo aceita somente números que existam no elenco do time.
+
+Não permitir edições após “Encerrado”, exceto ADM.
+
+Classificação recalculada automaticamente ao encerrar jogo.
+
+Acessibilidade: labels, aria-attributes, foco visível, alto contraste.
+
+API endpoints (exemplos; nomes em pt-BR):
+
+Auth: POST /api/auth/login, POST /api/auth/visitante (cria sessão anônima), POST /api/auth/logout
+
+Públicas: GET /api/competicoes, GET /api/competicoes/:id, GET /api/jogos, GET /api/jogos/:id, GET /api/classificacao?competicaoId=…
+
+Professor:
+
+GET/POST /api/times (apenas do professor), PATCH /api/times/:id
+
+GET /api/meus-jogos
+
+POST /api/jogos/:id/participacao (body: { numeros: number[] })
+
+POST /api/jogos/:id/recursos (body: { motivo: string })
+
+ADM:
+
+CRUD /api/admin/competicoes, /api/admin/escolas, /api/admin/professores, /api/admin/times
+
+POST/PATCH /api/admin/jogos (gerar confrontos; editar; encerrar; lançar placar)
+
+PATCH /api/admin/recursos/:id (mudar status, respostaAdm)
+
+UI pages/components (pt-BR):
+
+Navbar com: “Competições”, “Jogos”, “Resultados”, “Classificação”, “Entrar”.
+
+Telas de login separadas: “Login Professor”, “Login ADM”, e botão destacado “Entrar como Visitante”.
+
+Listas com filtros por competição, escola e status.
+
+Tabela de Jogos com colunas: Data, Hora, Local, Time da Casa, Time Visitante, Placar, Status, Ações (apenas se professor do time ou ADM).
+
+Formulários com validação e mensagens amigáveis em pt-BR.
+
+Security and operations:
+
+Sanitizar inputs; rate limit em auth; CORS configurado.
+
+Seeds idempotentes e script “npm run seed”.
+
+Scripts: dev, build, start, test, migrate, seed.
+
+Docker Compose com serviços api, web, db; README em pt-BR com instruções de execução.
+
+Deliverables:
+
+Complete source code with clean structure.
+
+Prisma schema and migrations.
+
+Seed script inserting the exact competitions, schools, and teachers listed above.
+
+README.md in pt-BR explaining setup, .env variables, and default logins (create one ADM admin with username “admin” and password “TrocarAdmin123!”).
+
+Minimal tests for login, role guard, creating team, posting participation, opening and deciding a resource, and computing classification after a match.
+
+Acceptance criteria:
+
+Visitor can enter without credentials and see tables of matches, results, and standings.
+
+Teacher can create a team for their school, set jersey numbers, record player numbers for a match, and open a resource.
+
+Admin can CRUD competitions, schools, and teachers, generate teacher logins, manage matches and scores, and decide resources.
+
+All UI is in Portuguese (Brazil), data seeded exactly as provided, and authorization prevents cross-access.
+
+Extras (nice-to-have, if time allows):
+
+Exportar tabela e classificação em CSV.
+
+Página pública por competição com chave de jogos (se aplicável).
+
+Notificações por e-mail quando um recurso é aberto ou decidido.
+
+Observações finais:
+
+Toda a interface, rótulos, validações, mensagens e textos devem ser em português do Brasil.
+
+Mantenha consistência de termos: “Competição”, “Escola”, “Professor”, “Time”, “Jogo”, “Recurso”, “Classificação”, “Números dos atletas”.
+
+Use nomes de entidades, rotas e campos em pt-BR conforme descrito acima.
